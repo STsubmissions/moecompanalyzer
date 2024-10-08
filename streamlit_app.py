@@ -1,22 +1,29 @@
 import streamlit as st
-import pandas as pd
 import os
-from improved_competitor_analyzer import ImprovedCompetitorAnalyzer
 
-# Set page configuration
 st.set_page_config(page_title="Improved Competitor Analyzer", layout="wide")
 
-# Title and description
 st.title("Improved Competitor Analyzer")
 st.markdown("Enter the prospect website URL and upload a text file containing your keywords (one keyword per line) to run the competitor analysis.")
+
+try:
+    import pandas as pd
+    from improved_competitor_analyzer import ImprovedCompetitorAnalyzer
+except ImportError as e:
+    st.error(f"Failed to import required modules: {str(e)}")
+    st.stop()
 
 # Input fields
 prospect_website = st.text_input("Prospect Website URL", placeholder="https://www.example.com")
 keywords_file = st.file_uploader("Upload Keywords File (.txt)", type=["txt"])
 
 # Get API keys from environment variables or Streamlit secrets
-valueserp_api_key = os.getenv("VALUESERP_API_KEY") or st.secrets["VALUESERP_API_KEY"]
-openai_api_key = os.getenv("OPENAI_API_KEY") or st.secrets["OPENAI_API_KEY"]
+valueserp_api_key = os.getenv("VALUESERP_API_KEY") or st.secrets.get("VALUESERP_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+
+if not valueserp_api_key or not openai_api_key:
+    st.error("API keys are missing. Please set VALUESERP_API_KEY and OPENAI_API_KEY in your environment variables or Streamlit secrets.")
+    st.stop()
 
 def run_analysis(prospect_website, keywords_file):
     analyzer = ImprovedCompetitorAnalyzer(valueserp_api_key, openai_api_key, prospect_website)
@@ -41,10 +48,13 @@ if st.button("Run Analysis"):
         st.error("Please provide both the prospect website URL and keywords file.")
     else:
         with st.spinner("Running analysis..."):
-            result = run_analysis(prospect_website, keywords_file)
-            if result is not None:
-                st.success("Analysis complete!")
-                st.dataframe(result)
+            try:
+                result = run_analysis(prospect_website, keywords_file)
+                if result is not None:
+                    st.success("Analysis complete!")
+                    st.dataframe(result)
+            except Exception as e:
+                st.error(f"An error occurred during analysis: {str(e)}")
 
 # Add information about required API keys
 st.sidebar.header("API Keys")
