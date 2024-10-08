@@ -1,0 +1,6 @@
+# File: requirements.txt
+gradio==3.50.2
+openai==1.3.5
+pandas==1.5.3
+requests==2.31.0
+tiktoken==0.5.1
