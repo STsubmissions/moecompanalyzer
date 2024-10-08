@@ -14,9 +14,9 @@ st.markdown("Enter the prospect website URL and upload a text file containing yo
 prospect_website = st.text_input("Prospect Website URL", placeholder="https://www.example.com")
 keywords_file = st.file_uploader("Upload Keywords File (.txt)", type=["txt"])
 
-# Get API keys from environment variables
-valueserp_api_key = os.getenv("VALUESERP_API_KEY")
-openai_api_key = os.getenv("OPENAI_API_KEY")
+# Get API keys from environment variables or Streamlit secrets
+valueserp_api_key = os.getenv("VALUESERP_API_KEY") or st.secrets["VALUESERP_API_KEY"]
+openai_api_key = os.getenv("OPENAI_API_KEY") or st.secrets["OPENAI_API_KEY"]
 
 def run_analysis(prospect_website, keywords_file):
     analyzer = ImprovedCompetitorAnalyzer(valueserp_api_key, openai_api_key, prospect_website)
@@ -48,7 +48,7 @@ if st.button("Run Analysis"):
 
 # Add information about required API keys
 st.sidebar.header("API Keys")
-st.sidebar.info("This app requires valid ValueSERP and OpenAI API keys to function. Please ensure these are set as environment variables.")
+st.sidebar.info("This app requires valid ValueSERP and OpenAI API keys. Please ensure these are set in your Streamlit secrets or as environment variables.")
 
 if __name__ == "__main__":
     st.sidebar.markdown("---")
